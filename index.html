@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data:">
+<title>The Ritual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@300;400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0f1117;
+    --surface:  #171a23;
+    --border:   #252836;
+    --border2:  #1e2130;
+    --text:     #e2ddd5;
+    --muted:    #6b6880;
+    --faint:    #2d2f3e;
+    --accent:   #e8784a;
+    --accent2:  #5b8dd9;
+    --green:    #4caf7d;
+    --gold:     #f0c060;
+    --coral-bg: rgba(232,120,74,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999;
+  }
+
+  /* ─── TITLE BAR ─── */
+  .title-bar {
+    -webkit-app-region: drag;
+    height: 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+
+  .title-bar-left { display: flex; align-items: center; gap: 10px; }
+
+  .win-controls { -webkit-app-region: no-drag; display: flex; gap: 7px; align-items: center; }
+
+  .win-btn {
+    width: 12px; height: 12px;
+    border-radius: 50%; border: none;
+    cursor: pointer; opacity: 0.85;
+    transition: opacity 0.15s;
+  }
+  .win-btn:hover { opacity: 1; }
+  .btn-close { background: #ff5f57; }
+  .btn-min   { background: #febc2e; }
+
+  .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    -webkit-app-region: no-drag;
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .nav-tab {
+    padding: 0.55rem 1.1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border: none; background: transparent;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    -webkit-app-region: no-drag;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .view.active { display: flex; }
+
+  /* ══════════════════════════
+     COMMIT VIEW
+  ══════════════════════════ */
+  #view-commit { background: var(--bg); }
+  #view-commit .pad {
+    padding: 2.4rem 2.2rem 2rem;
+    display: flex; flex-direction: column; flex: 1;
+  }
+
+  .commit-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+    animation: riseIn 0.5s ease 0.05s both;
+  }
+
+  .commit-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    animation: riseIn 0.5s ease 0.15s both;
+  }
+  .commit-headline em { font-style: italic; color: var(--accent); }
+
+  .commit-sub {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 2.2rem;
+    animation: riseIn 0.5s ease 0.22s both;
+  }
+
+  .field-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.55rem;
+    display: block;
+    animation: riseIn 0.5s ease 0.28s both;
+  }
+
+  .commit-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    font-weight: 400;
+    padding: 0.5rem 0;
+    outline: none;
+    transition: border-color 0.25s;
+    margin-bottom: 2rem;
+    animation: riseIn 0.5s ease 0.33s both;
+  }
+  .commit-input:focus { border-bottom-color: var(--accent); }
+  .commit-input::placeholder { color: var(--faint); font-style: italic; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    animation: riseIn 0.5s ease 0.38s both;
+  }
+  .btn-primary:hover { background: #f08a60; }
+  .btn-primary:active { transform: scale(0.985); }
+
+  .btn-skip {
+    display: block; width: 100%; margin-top: 0.9rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--faint); cursor: pointer;
+    background: none; border: none;
+    transition: color 0.2s;
+    animation: riseIn 0.5s ease 0.43s both;
+  }
+  .btn-skip:hover { color: var(--muted); }
+
+  .commit-quote {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border2);
+    animation: riseIn 0.6s ease 0.5s both;
+  }
+  .commit-quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.3rem;
+  }
+  .commit-quote-author {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  /* ══════════════════════════
+     TODAY VIEW
+  ══════════════════════════ */
+  #view-today { overflow-y: auto; flex: 1; }
+  #view-today::-webkit-scrollbar { width: 3px; }
+  #view-today::-webkit-scrollbar-track { background: transparent; }
+  #view-today::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .pad { padding: 1.6rem 2rem; }
+
+  .section-head {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.54rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Commitment banner */
+  .commitment-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.4rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .commitment-banner-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text);
+    line-height: 1.4;
+    flex: 1;
+  }
+  .commitment-banner-text.empty {
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-style: normal;
+    font-family: 'Lato', sans-serif;
+  }
+
+  .edit-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    background: none; border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    white-space: nowrap;
+    padding-top: 3px;
+    -webkit-app-region: no-drag;
+  }
+  .edit-btn:hover { color: var(--accent); }
+
+  /* Stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1.4rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.9rem 0.7rem;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 400;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .stat-val.accent-color { color: var(--accent); }
+  .stat-val.green-color  { color: var(--green); }
+  .stat-lbl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Check-in */
+  .checkin-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 0.95rem;
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    margin-bottom: 1.4rem;
+  }
+  .checkin-btn:hover { border-color: var(--accent); background: var(--coral-bg); }
+  .checkin-btn.done  { border-color: var(--green); background: rgba(76,175,125,0.07); color: var(--green); }
+
+  .chk-box {
+    width: 20px; height: 20px;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .checkin-btn.done .chk-box { background: var(--green); border-color: var(--green); color: #fff; }
+
+  /* Calendar */
+  .cal-wrap { margin-bottom: 1.4rem; }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cal-cell {
+    aspect-ratio: 1;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    transition: background 0.2s;
+    cursor: default;
+  }
+  .cal-cell.done    { background: rgba(76,175,125,0.32); border-color: rgba(76,175,125,0.45); }
+  .cal-cell.today   { border-color: var(--accent); box-shadow: 0 0 6px rgba(232,120,74,0.2); }
+  .cal-cell.today.done { background: rgba(76,175,125,0.5); border-color: var(--green); }
+
+  /* Quote card */
+  .quote-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 1.4rem;
+    position: relative;
+  }
+  .quote-card::before {
+    content: '"';
+    position: absolute;
+    top: -0.3rem; left: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+    opacity: 0.35;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.7;
+    padding-top: 0.6rem;
+    margin-bottom: 0.55rem;
+  }
+  .quote-author {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.53rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Reflection */
+  .reflection-ta {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 0.9rem;
+    padding: 0.9rem 1.1rem;
+    outline: none;
+    resize: none;
+    min-height: 76px;
+    transition: border-color 0.25s;
+    line-height: 1.65;
+    margin-bottom: 0.6rem;
+  }
+  .reflection-ta:focus { border-color: var(--accent2); }
+  .reflection-ta::placeholder { color: var(--faint); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ══════════════════════════
+     HISTORY VIEW
+  ══════════════════════════ */
+  #view-history { overflow-y: auto; flex: 1; }
+  #view-history::-webkit-scrollbar { width: 3px; }
+  #view-history::-webkit-scrollbar-track { background: transparent; }
+  #view-history::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .history-empty {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 2;
+  }
+
+  .history-item {
+    border-bottom: 1px solid var(--border2);
+    padding: 1rem 2rem;
+    transition: background 0.15s;
+  }
+  .history-item:hover { background: var(--surface); }
+
+  .history-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .h-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--faint);
+    flex-shrink: 0;
+  }
+  .h-dot.done { background: var(--green); }
+
+  .h-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.54rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .h-done-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    color: var(--green);
+    text-transform: uppercase;
+  }
+
+  .h-commitment {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: 0.2rem;
+  }
+  .h-commitment.none {
+    font-style: normal;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .h-reflection {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+    border-left: 2px solid var(--border);
+    padding-left: 0.7rem;
+    margin-top: 0.3rem;
+  }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed;
+    bottom: 1rem; left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.2rem;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 10000;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div class="title-bar">
+  <div class="title-bar-left">
+    <div class="win-controls">
+      <button class="win-btn btn-min" onclick="window.ritual.minimizeWindow()"></button>
+      <button class="win-btn btn-close" onclick="window.ritual.closeWindow()"></button>
+    </div>
+    <div class="brand">The Ritual</div>
+  </div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:0.52rem;letter-spacing:0.15em;color:var(--faint);-webkit-app-region:no-drag;" id="header-date"></div>
+</div>
+
+<!-- NAV TABS (hidden on commit view) -->
+<div class="nav-tabs" id="nav-tabs" style="display:none;">
+  <button class="nav-tab active" onclick="switchTab('today')">Today</button>
+  <button class="nav-tab" onclick="switchTab('history')">History</button>
+</div>
+
+<!-- ══ COMMIT VIEW ══ -->
+<div class="view active" id="view-commit">
+  <div class="pad">
+    <div class="commit-date" id="commit-date-label"></div>
+    <h1 class="commit-headline">What will you <em>commit</em><br>to today?</h1>
+    <p class="commit-sub">Name the one thing that matters most. Write it, own it.</p>
+    <label class="field-label" for="commitment-input">My commitment</label>
+    <input class="commit-input" id="commitment-input" type="text"
+           placeholder="Write for 30 min, meditate, go to the gym…" maxlength="100" />
+    <button class="btn-primary" id="confirm-btn">Begin today's ritual →</button>
+    <button class="btn-skip" id="skip-btn">no commitment today</button>
+    <div class="commit-quote">
+      <div class="commit-quote-text" id="commit-q-text"></div>
+      <div class="commit-quote-author" id="commit-q-author"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TODAY VIEW ══ -->
+<div class="view" id="view-today">
+  <div class="pad">
+    <div class="commitment-banner">
+      <div class="commitment-banner-text" id="commitment-display">No commitment set for today.</div>
+      <button class="edit-btn" onclick="showCommitView()">edit</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val accent-color" id="s-streak">0</div><div class="stat-lbl">Streak</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-done">0</div><div class="stat-lbl">Done</div></div>
+      <div class="stat-card"><div class="stat-val green-color" id="s-rate">—</div><div class="stat-lbl">Rate</div></div>
+    </div>
+
+    <button class="checkin-btn" id="checkin-btn" onclick="toggleCheckin()">
+      <div class="chk-box" id="chk-box">○</div>
+      <span id="chk-text">Mark today as done</span>
+    </button>
+
+    <div class="cal-wrap">
+      <div class="section-head">Last 28 days</div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text" id="q-txt"></div>
+      <div class="quote-author" id="q-auth"></div>
+    </div>
+
+    <div class="section-head">Today's reflection</div>
+    <textarea class="reflection-ta" id="reflection-ta"
+      placeholder="What worked? What didn't? What did you notice today…" rows="3"></textarea>
+    <button class="btn-secondary" onclick="saveReflection()" style="margin-bottom:1.6rem;">Save reflection</button>
+  </div>
+</div>
+
+<!-- ══ HISTORY VIEW ══ -->
+<div class="view" id="view-history">
+  <div id="history-list"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+// 40 UNIQUE QUOTES — non-repeating daily rotation
+// ═══════════════════════════════════
+const ALL_QUOTES = [
+  { t: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", a: "Aristotle" },
+  { t: "You don't rise to the level of your goals. You fall to the level of your systems.", a: "James Clear" },
+  { t: "Motivation gets you going, but discipline keeps you growing.", a: "John Maxwell" },
+  { t: "First forget inspiration. Habit is more dependable.", a: "Octavia Butler" },
+  { t: "The secret is to make our nervous system our ally instead of our enemy.", a: "William James" },
+  { t: "It's not what we do once in a while that shapes our lives, but what we do consistently.", a: "Tony Robbins" },
+  { t: "A year from now you may wish you had started today.", a: "Karen Lamb" },
+  { t: "The chains of habit are too light to be felt until they are too heavy to be broken.", a: "Samuel Johnson" },
+  { t: "We first make our habits, and then our habits make us.", a: "John Dryden" },
+  { t: "Success is the sum of small efforts, repeated day in and day out.", a: "Robert Collier" },
+  { t: "Long-term consistency trumps short-term intensity.", a: "Bruce Lee" },
+  { t: "The only discipline that lasts is self-discipline.", a: "Bum Phillips" },
+  { t: "Every action you take is a vote for the type of person you wish to become.", a: "James Clear" },
+  { t: "Don't count the days, make the days count.", a: "Muhammad Ali" },
+  { t: "Small daily improvements are the key to staggering long-term results.", a: "Robin Sharma" },
+  { t: "The difference between who you are and who you want to be is what you do.", a: "Unknown" },
+  { t: "Consistency is the true foundation of trust.", a: "Roy T. Bennett" },
+  { t: "You'll never change your life until you change something you do daily.", a: "John C. Maxwell" },
+  { t: "Discipline is the bridge between goals and accomplishment.", a: "Jim Rohn" },
+  { t: "Fall in love with the process and the results will come.", a: "Eric Thomas" },
+  { t: "The secret of getting ahead is getting started.", a: "Mark Twain" },
+  { t: "Great things are done by a series of small things brought together.", a: "Vincent Van Gogh" },
+  { t: "Act as if what you do makes a difference. It does.", a: "William James" },
+  { t: "Habits are the invisible architecture of daily life.", a: "Gretchen Rubin" },
+  { t: "The best time to plant a tree was 20 years ago. The second best time is now.", a: "Chinese Proverb" },
+  { t: "If you get tired, learn to rest, not to quit.", a: "Banksy" },
+  { t: "Knowing is not enough; we must apply. Willing is not enough; we must do.", a: "Goethe" },
+  { t: "Perseverance is not a long race; it is many short races one after the other.", a: "Walter Elliot" },
+  { t: "Start where you are. Use what you have. Do what you can.", a: "Arthur Ashe" },
+  { t: "It does not matter how slowly you go as long as you do not stop.", a: "Confucius" },
+  { t: "What you do every day matters more than what you do once in a while.", a: "Gretchen Rubin" },
+  { t: "Through discipline comes freedom.", a: "Aristotle" },
+  { t: "The groundwork of all happiness is health. Discipline is health.", a: "Leigh Hunt" },
+  { t: "Change is hard at first, messy in the middle, and gorgeous at the end.", a: "Robin Sharma" },
+  { t: "You have to be burning with an idea, or a problem, or a wrong that you want to right.", a: "Steve Jobs" },
+  { t: "In the beginning you make your habits, and then your habits make you.", a: "Anonymous" },
+  { t: "Today's actions are tomorrow's results.", a: "Unknown" },
+  { t: "Showing up is the most important thing.", a: "Woody Allen" },
+  { t: "You don't have to be great to get started, but you have to get started to be great.", a: "Les Brown" },
+  { t: "The cave you fear to enter holds the treasure you seek.", a: "Joseph Campbell" },
+];
+
+let appData = {};
+
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+async function persist() {
+  await window.ritual.saveData(appData);
+}
+
+// ─── NON-REPEATING DAILY QUOTE ───
+// Maintains a shuffled deck. Each day picks the next card.
+// When deck exhausted, reshuffles (avoids immediate repeats of last few).
+function getDailyQuote() {
+  const today = getToday();
+
+  // Already assigned today — return same quote
+  if (appData.quoteToday && appData.quoteToday.date === today) {
+    return ALL_QUOTES[appData.quoteToday.index] || ALL_QUOTES[0];
+  }
+
+  // Need a new quote for today
+  // Rebuild deck if empty
+  if (!Array.isArray(appData.quoteDeck) || appData.quoteDeck.length === 0) {
+    // Shuffle all indices, avoid last shown index at front
+    const lastIdx = appData.quoteToday ? appData.quoteToday.index : -1;
+    let deck = ALL_QUOTES.map((_, i) => i).filter(i => i !== lastIdx);
+    // Fisher-Yates shuffle
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    if (lastIdx >= 0) deck.push(lastIdx); // put avoided one at very end
+    appData.quoteDeck = deck;
+  }
+
+  const idx = appData.quoteDeck.shift(); // take from front
+  appData.quoteToday = { date: today, index: idx };
+  persist();
+  return ALL_QUOTES[idx];
+}
+
+// ─── NAVIGATION ───
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().trim() === tab);
+  });
+  ['view-today','view-history'].forEach(id => {
+    document.getElementById(id).classList.toggle('active', id === 'view-' + tab);
+    document.getElementById(id).style.display = id === 'view-' + tab ? 'flex' : 'none';
+  });
+  if (tab === 'history') renderHistory();
+}
+
+function showMainViews() {
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.remove('active');
+    v.style.display = 'none';
+  });
+  document.getElementById('nav-tabs').style.display = 'flex';
+  // Show today by default
+  const today = document.getElementById('view-today');
+  today.classList.add('active');
+  today.style.display = 'flex';
+  document.querySelectorAll('.nav-tab').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === 'Today');
+  });
+}
+
+function showCommitView() {
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.remove('active');
+    v.style.display = 'none';
+  });
+  document.getElementById('nav-tabs').style.display = 'none';
+  const cv = document.getElementById('view-commit');
+  cv.classList.add('active');
+  cv.style.display = 'flex';
+
+  // Pre-fill if editing
+  const today = getToday();
+  const existing = appData.days?.[today]?.commitment;
+  const input = document.getElementById('commitment-input');
+  input.value = existing || '';
+  setTimeout(() => { input.focus(); if (existing) input.select(); }, 200);
+}
+
+// ─── COMMIT VIEW ACTIONS ───
+async function confirmCommitment() {
+  const val = document.getElementById('commitment-input').value.trim();
+  const today = getToday();
+  if (!appData.days) appData.days = {};
+  if (!appData.days[today]) appData.days[today] = {};
+  appData.days[today].commitment = val || null;
+  appData.days[today].popupSeen = true;
+  await persist();
+  renderTodayView();
+  showMainViews();
+}
+
+async function skipCommitment() {
+  const today = getToday();
+  if (!appData.days) appData.days = {};
+  if (!appData.days[today]) appData.days[today] = {};
+  appData.days[today].popupSeen = true;
+  await persist();
+  renderTodayView();
+  showMainViews();
+}
+
+document.getElementById('confirm-btn').addEventListener('click', confirmCommitment);
+document.getElementById('commitment-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmCommitment();
+});
+document.getElementById('skip-btn').addEventListener('click', skipCommitment);
+
+// ─── TODAY VIEW ───
+function renderTodayView() {
+  const today = getToday();
+  const td = (appData.days && appData.days[today]) || {};
+
+  const disp = document.getElementById('commitment-display');
+  if (td.commitment) {
+    disp.textContent = `"${td.commitment}"`;
+    disp.classList.remove('empty');
+  } else {
+    disp.textContent = 'No commitment set — tap edit to add one.';
+    disp.classList.add('empty');
+  }
+
+  renderStats();
+  renderCheckin();
+  renderCalendar();
+  renderQuote();
+  document.getElementById('reflection-ta').value = td.reflection || '';
+}
+
+function renderStats() {
+  const days = appData.days || {};
+  const keys = Object.keys(days).sort();
+  const today = getToday();
+  let doneDays = 0;
+  keys.forEach(k => { if (days[k]?.done) doneDays++; });
+
+  let streak = 0;
+  const todayDone = days[today]?.done;
+  let d = new Date();
+  if (!todayDone) d.setDate(d.getDate() - 1);
+  for (let i = 0; i < 10000; i++) {
+    const k = d.toISOString().split('T')[0];
+    if (days[k]?.done) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+
+  const total = keys.length;
+  document.getElementById('s-streak').textContent = streak;
+  document.getElementById('s-done').textContent = doneDays;
+  document.getElementById('s-rate').textContent = total > 0
+    ? Math.round((doneDays / total) * 100) + '%' : '—';
+}
+
+async function toggleCheckin() {
+  const today = getToday();
+  if (!appData.days) appData.days = {};
+  if (!appData.days[today]) appData.days[today] = {};
+  appData.days[today].done = !appData.days[today].done;
+  await persist();
+  renderCheckin();
+  renderCalendar();
+  renderStats();
+  showToast(appData.days[today].done ? '✓  Day complete' : 'Unmarked');
+}
+
+function renderCheckin() {
+  const today = getToday();
+  const done = appData.days?.[today]?.done;
+  const btn = document.getElementById('checkin-btn');
+  btn.className = 'checkin-btn' + (done ? ' done' : '');
+  document.getElementById('chk-box').textContent = done ? '✓' : '○';
+  document.getElementById('chk-text').textContent = done
+    ? 'You showed up today — nicely done.'
+    : 'Mark today as done';
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const today = new Date();
+  const days = appData.days || {};
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const isToday = (i === 0);
+    const done = days[key]?.done;
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell' + (done ? ' done' : '') + (isToday ? ' today' : '');
+    cell.title = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+                 + (done ? ' ✓' : '');
+    grid.appendChild(cell);
+  }
+}
+
+function renderQuote() {
+  const q = getDailyQuote();
+  document.getElementById('q-txt').textContent = q.t;
+  document.getElementById('q-auth').textContent = '— ' + q.a;
+  document.getElementById('commit-q-text').textContent = `"${q.t}"`;
+  document.getElementById('commit-q-author').textContent = '— ' + q.a;
+}
+
+async function saveReflection() {
+  const today = getToday();
+  if (!appData.days) appData.days = {};
+  if (!appData.days[today]) appData.days[today] = {};
+  appData.days[today].reflection = document.getElementById('reflection-ta').value;
+  await persist();
+  showToast('Reflection saved');
+}
+
+// ─── HISTORY VIEW ───
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const days = appData.days || {};
+  const keys = Object.keys(days).sort().reverse();
+
+  if (keys.length === 0) {
+    list.innerHTML = '<div class="history-empty">No history yet.<br>Start building your streak.</div>';
+    return;
+  }
+
+  list.innerHTML = keys.map(key => {
+    const d = days[key];
+    const dateLabel = new Date(key + 'T12:00:00').toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+    });
+    return `
+      <div class="history-item">
+        <div class="history-row">
+          <div class="h-dot ${d.done ? 'done' : ''}"></div>
+          <div class="h-date">${dateLabel}</div>
+          ${d.done ? '<div class="h-done-label">✓ Done</div>' : ''}
+        </div>
+        <div class="h-commitment ${d.commitment ? '' : 'none'}">
+          ${d.commitment ? `"${d.commitment}"` : 'No commitment set'}
+        </div>
+        ${d.reflection ? `<div class="h-reflection">${d.reflection}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ─── INIT ───
+async function init() {
+  appData = await window.ritual.getData();
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric'
+  }).toUpperCase();
+  document.getElementById('header-date').textContent = dateStr;
+  document.getElementById('commit-date-label').textContent = dateStr;
+
+  // Always render the quote (needed for commit view too)
+  renderQuote();
+
+  const today = getToday();
+  const todayData = appData.days?.[today] || {};
+
+  if (todayData.popupSeen || todayData.commitment) {
+    renderTodayView();
+    showMainViews();
+  } else {
+    // Show commit popup - it's a new day
+    document.getElementById('view-commit').style.display = 'flex';
+    document.getElementById('view-commit').classList.add('active');
+    setTimeout(() => document.getElementById('commitment-input').focus(), 400);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

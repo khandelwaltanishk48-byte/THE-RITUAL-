@@ -1,0 +1,35 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.theritual.app
+productName: The Ritual
+copyright: Copyright © 2025
+mac:
+  category: public.app-category.productivity
+  icon: assets/icon.icns
+  hardenedRuntime: false
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+dmg:
+  title: The Ritual
+  background: assets/dmg-bg.png
+  window:
+    width: 540
+    height: 380
+  contents:
+    - x: 140
+      'y': 190
+      type: file
+    - x: 400
+      'y': 190
+      type: link
+      path: /Applications
+files:
+  - filter:
+      - src/**/*
+      - assets/**/*
+      - node_modules/**/*
+electronVersion: 28.3.3
