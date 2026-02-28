@@ -6,7 +6,7 @@ FIRST, DOWNLOAD THE ZIP PACKAGE ONLY
 
 or
 
-JUST DOWNLOAD THE DMG FILE
+JUST DOWNLOAD THE DMG FILE https://drive.google.com/file/d/1zYNSHO8z29OJh41-24hBIvql6Pn7SJCv/view?usp=drive_link
 ---
 
 ## What it does
