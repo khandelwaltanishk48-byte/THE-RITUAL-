@@ -1,7 +1,7 @@
 # The Ritual — macOS App
 
 A daily consistency tracker that **pops up automatically every time you log in** to your Mac.
-
+FIRST DOWNLOAD THE ZIP PACKAGE ONLY
 ---
 
 ## What it does
